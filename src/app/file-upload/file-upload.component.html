@@ -131,25 +131,13 @@
         <img
           [src]="preview.previewUrl"
           alt="Preview"
-          class="img-thumbnail"
-          style="
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-            position: relative;
-          "
+          class="img-thumbnail preview-img"
+       
         />
         <button
           type="button"
-          class="btn btn-dark btn-sm"
-          style="
-            position: absolute;
-            top: 0px;
-            right: 5px;
-            padding: 2px 6px;
-            border-radius: 50%;
-            z-index: 10;
-          "
+          class="btn btn-dark btn-sm remove-preview"
+      
           (click)="removePreview(i)"
         >
           &times;

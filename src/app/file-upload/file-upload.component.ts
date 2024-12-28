@@ -22,76 +22,6 @@ interface FileEntry {
   standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
 })
-// export class FileUploadComponent implements OnInit {
-//   uploadForm: FormGroup;
-//   filePreviews: { [key: number]: string | null } = {};
-//   previewList: string[] = []; // To store previews after submission
-
-//   constructor(private fb: FormBuilder) {
-//     this.uploadForm = this.fb.group({
-//       entries: this.fb.array([this.createEntry()]),
-//     });
-//   }
-
-//   ngOnInit() {}
-
-//   get entries(): FormArray {
-//     return this.uploadForm.get('entries') as FormArray;
-//   }
-
-//   createEntry(): FormGroup {
-//     return this.fb.group({
-//       fileName: ['', [Validators.required, Validators.maxLength(255)]],
-//       type: ['file', Validators.required],
-//       value: [null, Validators.required],
-//     });
-//   }
-
-//   addEntry(): void {
-//     this.entries.push(this.createEntry());
-//   }
-
-//   removeEntry(index: number): void {
-//     this.entries.removeAt(index);
-//     delete this.filePreviews[index];
-//   }
-
-//   onFileChange(event: Event, index: number): void {
-//     const fileInput = event.target as HTMLInputElement;
-//     const file = fileInput?.files?.[0] || null;
-//     if (file) {
-//       this.entries.at(index).get('value')?.setValue(file);
-//       const blobUrl = URL.createObjectURL(file);
-//       this.filePreviews[index] = blobUrl;
-//     }
-//   }
-
-//   onSubmit(): void {
-//     console.log(this.filePreviews);
-//     console.log(this.uploadForm);
-    
-//     if (this.uploadForm.valid) {
-//       this.previewList = this.entries.value.map((entry: FileEntry) => {
-//         if (entry.type === 'file' && entry.value instanceof File) {
-//           return URL.createObjectURL(entry.value); // Return Blob URL
-//         } else if (entry.type === 'url') {
-//           return entry.value as string; // Return URL string
-//         }
-//         return '';
-//       });
-
-//       this.entries.clear(); // Clear all entries from UI
-//       this.addEntry();
-//     }
-//   }
-
-//   removePreview(index: number): void {
-//     this.previewList.splice(index, 1); // Remove the selected preview
-//   }
-// }
-
-
-
 export class FileUploadComponent implements OnInit {
   uploadForm: FormGroup;
   filePreviews: { [key: number]: { fileName: string; previewUrl: string | null } } = {};
@@ -129,33 +59,38 @@ export class FileUploadComponent implements OnInit {
   onFileChange(event: Event, index: number): void {
     const fileInput = event.target as HTMLInputElement;
     const file = fileInput?.files?.[0] || null;
+  
     if (file) {
-      this.entries.at(index).get('value')?.setValue(file);
-      this.entries.at(index).get('fileName')?.setValue(file.name); // Set file name in the form
+      this.entries.at(index).get('value')?.setValue(file); // Set the file in the form
       const blobUrl = URL.createObjectURL(file);
-      this.filePreviews[index] = { fileName: file.name, previewUrl: blobUrl };
+      this.filePreviews[index] = { fileName: file.name, previewUrl: blobUrl }; // Store preview for display purposes
     }
   }
-
+  
   onSubmit(): void {
-    console.log(this.filePreviews);
-    console.log(this.uploadForm);
-
     if (this.uploadForm.valid) {
-      this.previewList = this.entries.value.map((entry: any) => {
+      this.previewList = this.entries.value.map((entry: any, index: number) => {
         if (entry.type === 'file' && entry.value instanceof File) {
-          return { fileName: entry.fileName, previewUrl: URL.createObjectURL(entry.value) }; // Store name and URL
+          // Generate and include Blob URL for the file
+          const blobUrl = this.filePreviews[index]?.previewUrl || URL.createObjectURL(entry.value);
+          return { fileName: entry.fileName, previewUrl: blobUrl };
         } else if (entry.type === 'url') {
-          return { fileName: entry.fileName, previewUrl: entry.value as string }; // Store name and URL
+          // Use the URL directly
+          return { fileName: entry.fileName, previewUrl: entry.value as string };
         }
         return { fileName: '', previewUrl: '' };
       });
-      this.entries.clear(); // Clear all entries from UI
+  
+      console.log('Form Data:', this.uploadForm.value); // For debugging form data
+      console.log('Preview List:', this.previewList);  // For debugging preview list
+  
+      // Reset the form and previews after submission
+      this.entries.clear();
       this.filePreviews = {};
       this.addEntry();
     }
   }
-
+  
   removePreview(index: number): void {
     this.previewList.splice(index, 1); // Remove the selected preview
   }
